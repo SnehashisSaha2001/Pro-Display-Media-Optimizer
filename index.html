@@ -533,18 +533,6 @@
             background: white;
         }
 
-        .audio-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border-radius: 4px;
-            font-size: 0.8rem;
-            margin-left: 0.5rem;
-        }
-
         .action-buttons {
             display: flex;
             gap: 1rem;
@@ -787,7 +775,7 @@
             <aside class="sidebar">
                 <div class="info-panel">
                     <h3><i class="fas fa-info-circle"></i> Display Optimization</h3>
-                    <p>This tool optimizes media for professional displays and digital signage. Supports both images and videos with real-time processing and audio preservation.</p>
+                    <p>This tool optimizes media for professional displays and digital signage. Supports both images and videos with real-time processing.</p>
                 </div>
 
                 <div class="control-group">
@@ -885,10 +873,6 @@
                     <label class="control-label">
                         <i class="fas fa-video"></i>
                         Video Settings
-                        <span class="audio-indicator" id="audioIndicator" style="display: none;">
-                            <i class="fas fa-volume-up"></i>
-                            Audio
-                        </span>
                     </label>
                     <div class="video-settings">
                         <div class="video-setting-row">
@@ -897,7 +881,7 @@
                                 <option value="30">30 fps</option>
                                 <option value="24">24 fps</option>
                                 <option value="60">60 fps</option>
-                                <option value="auto">Auto (Keep Original)</option>
+                                <option value="auto">Auto</option>
                             </select>
                         </div>
                         <div class="video-setting-row">
@@ -906,16 +890,15 @@
                                 <option value="5000">5 Mbps</option>
                                 <option value="8000">8 Mbps</option>
                                 <option value="10000">10 Mbps</option>
-                                <option value="auto">Auto (Match Quality)</option>
+                                <option value="auto">Auto</option>
                             </select>
                         </div>
                         <div class="video-setting-row">
-                            <label>Audio Quality:</label>
-                            <select id="audioQuality">
-                                <option value="128">128 kbps</option>
-                                <option value="192">192 kbps</option>
-                                <option value="256">256 kbps</option>
-                                <option value="auto">Auto (Keep Original)</option>
+                            <label>Codec:</label>
+                            <select id="codec">
+                                <option value="h264">H.264</option>
+                                <option value="vp9">VP9</option>
+                                <option value="auto">Auto</option>
                             </select>
                         </div>
                     </div>
@@ -969,7 +952,7 @@
                     <p class="upload-subtext">or click to browse</p>
                     <div class="supported-formats">
                         <i class="fas fa-info-circle"></i>
-                        Supported: JPEG, PNG, MP4, MOV, WebM, AVI (Audio preserved)
+                        Supported: JPEG, PNG, MP4, MOV, WebM, AVI (Real-time processing)
                     </div>
                     <input type="file" id="fileInput" accept="image/*,video/*">
                 </div>
@@ -1016,7 +999,6 @@
         let flipV = 1;
         let outputFormat = 'auto';
         let resizeMode = 'fit'; // 'fit' or 'fill'
-        let hasAudio = false;
 
         // DOM elements
         const uploadArea = document.getElementById('uploadArea');
@@ -1041,10 +1023,9 @@
         const applyRatio = document.getElementById('applyRatio');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const videoSettingsGroup = document.getElementById('videoSettingsGroup');
-        const audioIndicator = document.getElementById('audioIndicator');
         const frameRate = document.getElementById('frameRate');
         const bitrate = document.getElementById('bitrate');
-        const audioQuality = document.getElementById('audioQuality');
+        const codec = document.getElementById('codec');
         const toast = document.getElementById('toast');
         const toastTitle = document.getElementById('toastTitle');
         const toastMessage = document.getElementById('toastMessage');
@@ -1273,14 +1254,6 @@
                 currentAspectRatio = originalAspectRatio;
                 widthInput.value = originalWidth;
                 heightInput.value = originalHeight;
-                
-                // Check for audio
-                hasAudio = previewVideo.mozHasAudio || 
-                          previewVideo.webkitAudioDecodedByteCount > 0 ||
-                          previewVideo.audioTracks && previewVideo.audioTracks.length > 0;
-                
-                audioIndicator.style.display = hasAudio ? 'inline-flex' : 'none';
-                
                 updateMediaInfo(file);
                 detectAndSetAspectRatio();
                 updatePreviewInfo();
@@ -1356,7 +1329,6 @@
         function updateMediaInfo(file) {
             const fileSize = (file.size / 1024 / 1024).toFixed(2);
             let duration = '';
-            let audioInfo = '';
             
             if (currentMediaType === 'video') {
                 const video = previewVideo;
@@ -1364,9 +1336,6 @@
                     const minutes = Math.floor(video.duration / 60);
                     const seconds = Math.floor(video.duration % 60);
                     duration = `<div><strong>Duration:</strong> ${minutes}:${seconds.toString().padStart(2, '0')}</div>`;
-                }
-                if (hasAudio) {
-                    audioInfo = `<div><strong>Audio:</strong> <span style="color: var(--success);">Present</span></div>`;
                 }
             }
             
@@ -1376,7 +1345,6 @@
                 <div><strong>Original:</strong> ${originalWidth}×${originalHeight}</div>
                 <div><strong>Aspect Ratio:</strong> ${calculateAspectRatio(originalWidth, originalHeight)}</div>
                 ${duration}
-                ${audioInfo}
             `;
         }
 
@@ -1463,7 +1431,6 @@
                 const newHeight = parseInt(heightInput.value);
                 const targetFrameRate = frameRate.value === 'auto' ? 30 : parseInt(frameRate.value);
                 const targetBitrate = bitrate.value === 'auto' ? 5000000 : parseInt(bitrate.value) * 1000;
-                const targetAudioBitrate = audioQuality.value === 'auto' ? 128000 : parseInt(audioQuality.value) * 1000;
                 
                 // Create canvas for video processing
                 const canvas = document.createElement('canvas');
@@ -1474,115 +1441,173 @@
                 // Create video element for processing
                 const video = document.createElement('video');
                 video.src = URL.createObjectURL(currentFile);
-                video.muted = false;
+                video.crossOrigin = 'anonymous';
+                video.playsInline = true;
+                video.muted = false; // Important: Don't mute to capture audio
+                
+                // Create a container div to hold the video (hidden but in DOM)
+                const videoContainer = document.createElement('div');
+                videoContainer.style.position = 'absolute';
+                videoContainer.style.top = '-9999px';
+                videoContainer.style.left = '-9999px';
+                videoContainer.style.width = '1px';
+                videoContainer.style.height = '1px';
+                videoContainer.style.overflow = 'hidden';
+                videoContainer.appendChild(video);
+                document.body.appendChild(videoContainer);
                 
                 video.addEventListener('loadedmetadata', async () => {
                     const duration = video.duration;
-                    const originalFrameRate = 30; // Estimate
-                    const totalFrames = Math.floor(duration * targetFrameRate);
-                    const frameInterval = 1000 / targetFrameRate;
                     
-                    // Create audio context and capture audio if present
-                    let audioStream = null;
-                    if (hasAudio) {
-                        try {
-                            audioStream = await captureAudioStream(video);
-                        } catch (error) {
-                            console.log('Audio capture failed, continuing with video only');
+                    try {
+                        // Set playback rate to speed up processing while maintaining audio
+                        // We'll use a moderate speed to ensure audio quality
+                        const playbackSpeed = Math.min(4, Math.max(1, 30 / targetFrameRate));
+                        video.playbackRate = playbackSpeed;
+                        
+                        // Create video stream from canvas
+                        const videoStream = canvas.captureStream(targetFrameRate);
+                        
+                        // Get audio from the playing video
+                        let audioStream;
+                        
+                        // Try to get audio from the video element directly
+                        if (video.captureStream) {
+                            const videoWithAudio = video.captureStream();
+                            const audioTracks = videoWithAudio.getAudioTracks();
+                            if (audioTracks.length > 0) {
+                                audioStream = new MediaStream(audioTracks);
+                            }
                         }
-                    }
-                    
-                    // Create MediaRecorder for output
-                    const outputStream = canvas.captureStream(targetFrameRate);
-                    
-                    // Add audio track if available
-                    if (audioStream) {
-                        const audioTracks = audioStream.getAudioTracks();
-                        if (audioTracks.length > 0) {
-                            outputStream.addTrack(audioTracks[0]);
+                        
+                        // If no audio from captureStream, try AudioContext method
+                        if (!audioStream || audioStream.getAudioTracks().length === 0) {
+                            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                            const source = audioContext.createMediaElementSource(video);
+                            const destination = audioContext.createMediaStreamDestination();
+                            source.connect(destination);
+                            source.connect(audioContext.destination);
+                            audioStream = destination.stream;
                         }
-                    }
-                    
-                    const mimeType = outputFormat === 'mp4' ? 'video/webm;codecs=vp9,opus' : 'video/webm;codecs=vp9,opus';
-                    const mediaRecorder = new MediaRecorder(outputStream, {
-                        mimeType: mimeType,
-                        videoBitsPerSecond: targetBitrate,
-                        audioBitsPerSecond: targetAudioBitrate
-                    });
-                    
-                    const chunks = [];
-                    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-                    mediaRecorder.onstop = () => {
-                        const blob = new Blob(chunks, { type: 'video/webm' });
-                        const extension = outputFormat === 'mp4' ? 'mp4' : 'webm';
-                        downloadFile(blob, `display_optimized_${currentFile.name.split('.')[0]}.${extension}`);
-                        showToast('Success', `Video processed successfully${hasAudio ? ' with audio' : ''}`, 'success');
-                        URL.revokeObjectURL(video.src);
+                        
+                        // Combine streams
+                        const outputStream = new MediaStream();
+                        
+                        // Add video track
+                        const videoTracks = videoStream.getVideoTracks();
+                        if (videoTracks.length > 0) {
+                            outputStream.addTrack(videoTracks[0]);
+                        }
+                        
+                        // Add audio track if available
+                        if (audioStream) {
+                            const audioTracks = audioStream.getAudioTracks();
+                            if (audioTracks.length > 0) {
+                                outputStream.addTrack(audioTracks[0]);
+                            }
+                        }
+                        
+                        // Determine the best MIME type
+                        let mimeType = 'video/webm;codecs=vp9,opus';
+                        if (!MediaRecorder.isTypeSupported(mimeType)) {
+                            mimeType = 'video/webm;codecs=vp8,opus';
+                        }
+                        if (!MediaRecorder.isTypeSupported(mimeType)) {
+                            mimeType = 'video/webm';
+                        }
+                        if (!MediaRecorder.isTypeSupported(mimeType)) {
+                            mimeType = 'video/mp4';
+                        }
+                        
+                        const mediaRecorder = new MediaRecorder(outputStream, {
+                            mimeType: mimeType,
+                            videoBitsPerSecond: targetBitrate,
+                            audioBitsPerSecond: 128000
+                        });
+                        
+                        const chunks = [];
+                        mediaRecorder.ondataavailable = (e) => {
+                            if (e.data.size > 0) {
+                                chunks.push(e.data);
+                            }
+                        };
+                        
+                        mediaRecorder.onstop = () => {
+                            const blob = new Blob(chunks, { type: mimeType });
+                            const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+                            downloadFile(blob, `display_optimized_${currentFile.name.split('.')[0]}.${extension}`);
+                            
+                            // Cleanup
+                            video.pause();
+                            video.src = '';
+                            document.body.removeChild(videoContainer);
+                            URL.revokeObjectURL(video.src);
+                            
+                            showToast('Success', 'Video processed successfully with audio', 'success');
+                            resolve();
+                        };
+                        
+                        mediaRecorder.onerror = (event) => {
+                            console.error('MediaRecorder error:', event);
+                            showToast('Error', 'Failed to record video', 'error');
+                            resolve();
+                        };
+                        
+                        // Start recording
+                        mediaRecorder.start(100); // Collect data every 100ms
+                        
+                        // Start playing the video
+                        await video.play();
+                        
+                        // Process frames while video is playing
+                        const processFrame = () => {
+                            if (video.paused || video.ended) {
+                                mediaRecorder.stop();
+                                return;
+                            }
+                            
+                            // Clear canvas and apply transformations
+                            ctx.save();
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.translate(canvas.width / 2, canvas.height / 2);
+                            ctx.rotate((rotation * Math.PI) / 180);
+                            ctx.scale(flipH, flipV);
+                            
+                            // Draw video frame
+                            ctx.drawImage(video, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+                            ctx.restore();
+                            
+                            // Update progress
+                            const progress = (video.currentTime / duration) * 100;
+                            progressFill.style.width = progress + '%';
+                            progressText.textContent = `Processing: ${Math.round(progress)}%`;
+                            
+                            // Continue processing
+                            requestAnimationFrame(processFrame);
+                        };
+                        
+                        // Start processing frames
+                        requestAnimationFrame(processFrame);
+                        
+                    } catch (error) {
+                        console.error('Error processing video:', error);
+                        showToast('Error', 'Failed to process video: ' + error.message, 'error');
+                        document.body.removeChild(videoContainer);
                         resolve();
-                    };
-                    
-                    mediaRecorder.start();
-                    
-                    // Process each frame
-                    let currentTime = 0;
-                    const processFrame = async () => {
-                        if (currentTime >= duration) {
-                            mediaRecorder.stop();
-                            return;
-                        }
-                        
-                        video.currentTime = currentTime;
-                        await new Promise(r => video.onseeked = r);
-                        
-                        // Clear canvas and apply transformations
-                        ctx.save();
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.translate(canvas.width / 2, canvas.height / 2);
-                        ctx.rotate((rotation * Math.PI) / 180);
-                        ctx.scale(flipH, flipV);
-                        
-                        // Draw video frame
-                        ctx.drawImage(video, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
-                        ctx.restore();
-                        
-                        // Update progress
-                        const progress = (currentTime / duration) * 100;
-                        progressFill.style.width = progress + '%';
-                        progressText.textContent = `Processing: ${Math.round(progress)}%${hasAudio ? ' (with audio)' : ''}`;
-                        
-                        currentTime += 1 / targetFrameRate;
-                        setTimeout(processFrame, 10);
-                    };
-                    
-                    processFrame();
+                    }
                 });
                 
+                video.onerror = () => {
+                    console.error('Video loading error');
+                    showToast('Error', 'Failed to load video', 'error');
+                    if (document.body.contains(videoContainer)) {
+                        document.body.removeChild(videoContainer);
+                    }
+                    resolve();
+                };
+                
+                // Load the video
                 video.load();
-            });
-        }
-
-        async function captureAudioStream(video) {
-            return new Promise((resolve, reject) => {
-                try {
-                    // Create audio context
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    
-                    // Create source from video element
-                    const source = audioContext.createMediaElementSource(video);
-                    
-                    // Create destination for recording
-                    const destination = audioContext.createMediaStreamDestination();
-                    
-                    // Connect source to destination
-                    source.connect(destination);
-                    source.connect(audioContext.destination);
-                    
-                    // Get the stream
-                    const stream = destination.stream;
-                    resolve(stream);
-                } catch (error) {
-                    reject(error);
-                }
             });
         }
 
@@ -1606,13 +1631,11 @@
             outputFormat = 'auto';
             currentAspectRatio = 16/9;
             resizeMode = 'fit';
-            hasAudio = false;
             
             uploadArea.style.display = 'block';
             mediaPreview.classList.remove('active');
             applyBtn.disabled = true;
             videoSettingsGroup.style.display = 'none';
-            audioIndicator.style.display = 'none';
             
             previewImage.style.transform = '';
             previewVideo.style.transform = '';
@@ -1631,9 +1654,9 @@
             qualitySlider.value = 90;
             qualityValue.textContent = '90%';
             aspectRatioLock.checked = true;
-            frameRate.value = 'auto';
-            bitrate.value = 'auto';
-            audioQuality.value = 'auto';
+            frameRate.value = '30';
+            bitrate.value = '5000';
+            codec.value = 'h264';
             
             fileInput.value = '';
         }
