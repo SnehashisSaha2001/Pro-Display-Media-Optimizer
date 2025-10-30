@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Display Media Optimizer - Professional Display Content Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --secondary: #dc2626;
+            --accent: #0ea5e9;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--dark);
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: var(--secondary);
+        }
+
+        .pro-badge {
+            background: var(--secondary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        .compatibility-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .compatibility-info i {
+            color: var(--success);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            min-height: 650px;
+        }
+
+        .sidebar {
+            background: var(--light);
+            padding: 2rem;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .content-area {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: var(--light);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(30, 64, 175, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(30, 64, 175, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtext {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .supported-formats {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(30, 64, 175, 0.05);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--primary);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .media-preview {
+            position: relative;
+            background: var(--light);
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+            min-height: 400px;
+        }
+
+        .media-preview.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-container {
+            position: relative;
+            max-width: 100%;
+            max-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #previewImage, #previewVideo {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .media-info {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow);
+            border-left: 3px solid var(--primary);
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .control-label i {
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .display-presets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .preset-btn {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--primary);
+            background: rgba(30, 64, 175, 0.05);
+        }
+
+        .preset-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .preset-btn span:first-child {
+            font-weight: 600;
+        }
+
+        .preset-btn span:last-child {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .custom-resolution {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .resolution-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .resolution-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .aspect-ratio-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .aspect-ratio-presets {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ratio-btn {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .ratio-btn:hover {
+            border-color: var(--primary);
+            background: rgba(30, 64, 175, 0.05);
+        }
+
+        .ratio-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .custom-ratio {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .custom-ratio input {
+            width: 60px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .custom-ratio input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .aspect-ratio-lock {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .resize-mode {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(30, 64, 175, 0.05);
+            border-radius: 8px;
+        }
+
+        .resize-mode-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .resize-mode-btn:hover {
+            border-color: var(--primary);
+            background: rgba(30, 64, 175, 0.05);
+        }
+
+        .resize-mode-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .orientation-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .orientation-btn {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .orientation-btn:hover {
+            border-color: var(--primary);
+            background: rgba(30, 64, 175, 0.05);
+        }
+
+        .orientation-btn i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .orientation-btn span {
+            font-size: 0.85rem;
+        }
+
+        .slider-control {
+            margin-top: 1rem;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .format-options {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .format-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+        }
+
+        .format-btn:hover {
+            border-color: var(--primary);
+            background: rgba(30, 64, 175, 0.05);
+        }
+
+        .format-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .video-settings {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(30, 64, 175, 0.05);
+            border-radius: 8px;
+        }
+
+        .video-setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-setting-row label {
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+
+        .video-setting-row select {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        .audio-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--dark);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--warning);
+        }
+
+        .toast i {
+            font-size: 1.5rem;
+        }
+
+        .toast.success i {
+            color: var(--success);
+        }
+
+        .toast.error i {
+            color: var(--danger);
+        }
+
+        .toast.warning i {
+            color: var(--warning);
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .progress-container {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-panel {
+            background: rgba(30, 64, 175, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-left: 3px solid var(--primary);
+        }
+
+        .info-panel h3 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .info-panel p {
+            font-size: 0.85rem;
+            color: var(--gray);
+            line-height: 1.4;
+        }
+
+        .preview-info {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow);
+            border-right: 3px solid var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .display-presets {
+                grid-template-columns: 1fr;
+            }
+
+            .aspect-ratio-presets {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .orientation-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-desktop"></i>
+                <span>Pro Display Media Optimizer</span>
+                <span class="pro-badge">PRO</span>
+            </div>
+            <div class="compatibility-info">
+                <i class="fas fa-check-circle"></i>
+                <span>Optimized for Professional Displays & Digital Signage</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <aside class="sidebar">
+                <div class="info-panel">
+                    <h3><i class="fas fa-info-circle"></i> Display Optimization</h3>
+                    <p>This tool optimizes media for professional displays and digital signage. Supports both images and videos with real-time processing and audio preservation.</p>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">
+                        <i class="fas fa-tv"></i>
+                        Display Resolution Presets
+                    </label>
+                    <div class="display-presets">
+                        <button class="preset-btn" data-width="3840" data-height="2160">
+                            <span>4K UHD</span>
+                            <span>3840×2160</span>
+                        </button>
+                        <button class="preset-btn" data-width="1920" data-height="1080">
+                            <span>Full HD</span>
+                            <span>1920×1080</span>
+                        </button>
+                        <button class="preset-btn" data-width="1366" data-height="768">
+                            <span>Standard</span>
+                            <span>1366×768</span>
+                        </button>
+                        <button class="preset-btn" data-width="1280" data-height="720">
+                            <span>HD Ready</span>
+                            <span>1280×720</span>
+                        </button>
+                    </div>
+                    <div class="custom-resolution">
+                        <input type="number" id="widthInput" class="resolution-input" placeholder="Width" value="1920">
+                        <span style="color: var(--gray);">×</span>
+                        <input type="number" id="heightInput" class="resolution-input" placeholder="Height" value="1080">
+                    </div>
+                    
+                    <div class="resize-mode">
+                        <button class="resize-mode-btn active" data-mode="fit">Fit (Maintain Ratio)</button>
+                        <button class="resize-mode-btn" data-mode="fill">Fill (Exact Size)</button>
+                    </div>
+                    
+                    <div class="aspect-ratio-section">
+                        <label class="control-label" style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                            Aspect Ratio
+                        </label>
+                        <div class="aspect-ratio-presets">
+                            <button class="ratio-btn" data-ratio="16:9">16:9</button>
+                            <button class="ratio-btn" data-ratio="4:3">4:3</button>
+                            <button class="ratio-btn" data-ratio="1:1">1:1</button>
+                            <button class="ratio-btn" data-ratio="9:16">9:16</button>
+                            <button class="ratio-btn" data-ratio="21:9">21:9</button>
+                            <button class="ratio-btn" data-ratio="3:2">3:2</button>
+                        </div>
+                        <div class="custom-ratio">
+                            <span style="color: var(--gray); font-size: 0.9rem;">Custom:</span>
+                            <input type="number" id="ratioWidth" placeholder="W" value="16" min="1">
+                            <span style="color: var(--gray);">:</span>
+                            <input type="number" id="ratioHeight" placeholder="H" value="9" min="1">
+                            <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" id="applyRatio">
+                                Apply
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="aspect-ratio-lock">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="aspectRatioLock" checked>
+                            <label for="aspectRatioLock">Lock aspect ratio</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">
+                        <i class="fas fa-sync-alt"></i>
+                        Orientation
+                    </label>
+                    <div class="orientation-controls">
+                        <button class="orientation-btn" id="rotateLeft">
+                            <i class="fas fa-rotate-left"></i>
+                            <span>Rotate Left</span>
+                        </button>
+                        <button class="orientation-btn" id="rotateRight">
+                            <i class="fas fa-rotate-right"></i>
+                            <span>Rotate Right</span>
+                        </button>
+                        <button class="orientation-btn" id="flipHorizontal">
+                            <i class="fas fa-arrows-alt-h"></i>
+                            <span>Flip H</span>
+                        </button>
+                        <button class="orientation-btn" id="flipVertical">
+                            <i class="fas fa-arrows-alt-v"></i>
+                            <span>Flip V</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-group" id="videoSettingsGroup" style="display: none;">
+                    <label class="control-label">
+                        <i class="fas fa-video"></i>
+                        Video Settings
+                        <span class="audio-indicator" id="audioIndicator" style="display: none;">
+                            <i class="fas fa-volume-up"></i>
+                            Audio
+                        </span>
+                    </label>
+                    <div class="video-settings">
+                        <div class="video-setting-row">
+                            <label>Frame Rate:</label>
+                            <select id="frameRate">
+                                <option value="30">30 fps</option>
+                                <option value="24">24 fps</option>
+                                <option value="60">60 fps</option>
+                                <option value="auto">Auto (Keep Original)</option>
+                            </select>
+                        </div>
+                        <div class="video-setting-row">
+                            <label>Bitrate:</label>
+                            <select id="bitrate">
+                                <option value="5000">5 Mbps</option>
+                                <option value="8000">8 Mbps</option>
+                                <option value="10000">10 Mbps</option>
+                                <option value="auto">Auto (Match Quality)</option>
+                            </select>
+                        </div>
+                        <div class="video-setting-row">
+                            <label>Audio Quality:</label>
+                            <select id="audioQuality">
+                                <option value="128">128 kbps</option>
+                                <option value="192">192 kbps</option>
+                                <option value="256">256 kbps</option>
+                                <option value="auto">Auto (Keep Original)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">
+                        <i class="fas fa-sliders-h"></i>
+                        Quality Settings
+                    </label>
+                    <div class="slider-control">
+                        <input type="range" id="qualitySlider" class="slider" min="10" max="100" value="90">
+                        <div class="slider-value">
+                            <span>Low</span>
+                            <span id="qualityValue">90%</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">
+                        <i class="fas fa-file-export"></i>
+                        Output Format
+                    </label>
+                    <div class="format-options">
+                        <button class="format-btn active" data-format="auto">Auto</button>
+                        <button class="format-btn" data-format="jpeg">JPEG</button>
+                        <button class="format-btn" data-format="png">PNG</button>
+                        <button class="format-btn" data-format="mp4">MP4</button>
+                        <button class="format-btn" data-format="webm">WebM</button>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="resetBtn">
+                        <i class="fas fa-undo"></i>
+                        Reset
+                    </button>
+                    <button class="btn btn-primary" id="applyBtn" disabled>
+                        <i class="fas fa-check"></i>
+                        Apply & Optimize
+                    </button>
+                </div>
+            </aside>
+
+            <section class="content-area">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <p class="upload-text">Drop your media file here</p>
+                    <p class="upload-subtext">or click to browse</p>
+                    <div class="supported-formats">
+                        <i class="fas fa-info-circle"></i>
+                        Supported: JPEG, PNG, MP4, MOV, WebM, AVI (Audio preserved)
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*,video/*">
+                </div>
+
+                <div class="media-preview" id="mediaPreview">
+                    <div class="preview-container">
+                        <img id="previewImage" style="display: none;">
+                        <video id="previewVideo" controls style="display: none;"></video>
+                    </div>
+                    <div class="media-info" id="mediaInfo"></div>
+                    <div class="preview-info" id="previewInfo"></div>
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">Processing...</div>
+                    </div>
+                    <div class="loading-overlay" id="loadingOverlay">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <div>
+            <div id="toastTitle">Success</div>
+            <div id="toastMessage" style="font-size: 0.9rem; color: var(--gray);">Operation completed</div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentFile = null;
+        let currentMediaType = null;
+        let originalWidth = 0;
+        let originalHeight = 0;
+        let originalAspectRatio = 0;
+        let currentAspectRatio = 16/9;
+        let rotation = 0;
+        let flipH = 1;
+        let flipV = 1;
+        let outputFormat = 'auto';
+        let resizeMode = 'fit'; // 'fit' or 'fill'
+        let hasAudio = false;
+
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const mediaPreview = document.getElementById('mediaPreview');
+        const previewImage = document.getElementById('previewImage');
+        const previewVideo = document.getElementById('previewVideo');
+        const mediaInfo = document.getElementById('mediaInfo');
+        const previewInfo = document.getElementById('previewInfo');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const widthInput = document.getElementById('widthInput');
+        const heightInput = document.getElementById('heightInput');
+        const ratioWidth = document.getElementById('ratioWidth');
+        const ratioHeight = document.getElementById('ratioHeight');
+        const aspectRatioLock = document.getElementById('aspectRatioLock');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityValue = document.getElementById('qualityValue');
+        const applyBtn = document.getElementById('applyBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const applyRatio = document.getElementById('applyRatio');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const videoSettingsGroup = document.getElementById('videoSettingsGroup');
+        const audioIndicator = document.getElementById('audioIndicator');
+        const frameRate = document.getElementById('frameRate');
+        const bitrate = document.getElementById('bitrate');
+        const audioQuality = document.getElementById('audioQuality');
+        const toast = document.getElementById('toast');
+        const toastTitle = document.getElementById('toastTitle');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // File upload
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+
+            // Display presets
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const presetWidth = parseInt(btn.dataset.width);
+                    const presetHeight = parseInt(btn.dataset.height);
+                    
+                    if (resizeMode === 'fit') {
+                        // Calculate dimensions that maintain aspect ratio
+                        const presetRatio = presetWidth / presetHeight;
+                        
+                        if (currentAspectRatio > presetRatio) {
+                            // Image is wider than preset ratio, fit to width
+                            widthInput.value = presetWidth;
+                            heightInput.value = Math.round(presetWidth / currentAspectRatio);
+                        } else {
+                            // Image is taller than preset ratio, fit to height
+                            heightInput.value = presetHeight;
+                            widthInput.value = Math.round(presetHeight * currentAspectRatio);
+                        }
+                    } else {
+                        // Fill mode - use exact preset dimensions
+                        widthInput.value = presetWidth;
+                        heightInput.value = presetHeight;
+                    }
+                    
+                    updatePreviewInfo();
+                });
+            });
+
+            // Resize mode buttons
+            document.querySelectorAll('.resize-mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.resize-mode-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    resizeMode = btn.dataset.mode;
+                    
+                    // Recalculate dimensions if a preset is active
+                    const activePreset = document.querySelector('.preset-btn.active');
+                    if (activePreset) {
+                        activePreset.click();
+                    }
+                });
+            });
+
+            // Aspect ratio presets
+            document.querySelectorAll('.ratio-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const [w, h] = btn.dataset.ratio.split(':').map(Number);
+                    ratioWidth.value = w;
+                    ratioHeight.value = h;
+                    currentAspectRatio = w / h;
+                    applyAspectRatio();
+                });
+            });
+
+            // Custom ratio apply
+            applyRatio.addEventListener('click', () => {
+                const w = parseInt(ratioWidth.value);
+                const h = parseInt(ratioHeight.value);
+                if (w > 0 && h > 0) {
+                    currentAspectRatio = w / h;
+                    document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+                    applyAspectRatio();
+                    showToast('Success', `Custom aspect ratio ${w}:${h} applied`, 'success');
+                }
+            });
+
+            // Custom resolution inputs
+            widthInput.addEventListener('input', () => {
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                if (aspectRatioLock.checked) {
+                    heightInput.value = Math.round(widthInput.value / currentAspectRatio);
+                }
+                updatePreviewInfo();
+            });
+
+            heightInput.addEventListener('input', () => {
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                if (aspectRatioLock.checked) {
+                    widthInput.value = Math.round(heightInput.value * currentAspectRatio);
+                }
+                updatePreviewInfo();
+            });
+
+            // Orientation controls
+            document.getElementById('rotateLeft').addEventListener('click', () => {
+                rotation -= 90;
+                updateMediaTransform();
+            });
+
+            document.getElementById('rotateRight').addEventListener('click', () => {
+                rotation += 90;
+                updateMediaTransform();
+            });
+
+            document.getElementById('flipHorizontal').addEventListener('click', () => {
+                flipH *= -1;
+                updateMediaTransform();
+            });
+
+            document.getElementById('flipVertical').addEventListener('click', () => {
+                flipV *= -1;
+                updateMediaTransform();
+            });
+
+            // Quality slider
+            qualitySlider.addEventListener('input', () => {
+                qualityValue.textContent = qualitySlider.value + '%';
+            });
+
+            // Format options
+            document.querySelectorAll('.format-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    outputFormat = btn.dataset.format;
+                });
+            });
+
+            // Action buttons
+            applyBtn.addEventListener('click', applyChanges);
+            resetBtn.addEventListener('click', resetAll);
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                showToast('Error', 'Please select an image or video file', 'error');
+                return;
+            }
+
+            currentFile = file;
+            currentMediaType = file.type.startsWith('image/') ? 'image' : 'video';
+
+            uploadArea.style.display = 'none';
+            mediaPreview.classList.add('active');
+
+            // Show/hide video settings based on media type
+            videoSettingsGroup.style.display = currentMediaType === 'video' ? 'block' : 'none';
+
+            if (currentMediaType === 'image') {
+                loadImage(file);
+            } else {
+                loadVideo(file);
+            }
+
+            applyBtn.disabled = false;
+        }
+
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewImage.style.display = 'block';
+                previewVideo.style.display = 'none';
+
+                previewImage.onload = () => {
+                    originalWidth = previewImage.naturalWidth;
+                    originalHeight = previewImage.naturalHeight;
+                    originalAspectRatio = originalWidth / originalHeight;
+                    currentAspectRatio = originalAspectRatio;
+                    widthInput.value = originalWidth;
+                    heightInput.value = originalHeight;
+                    updateMediaInfo(file);
+                    detectAndSetAspectRatio();
+                    updatePreviewInfo();
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadVideo(file) {
+            const url = URL.createObjectURL(file);
+            previewVideo.src = url;
+            previewVideo.style.display = 'block';
+            previewImage.style.display = 'none';
+
+            previewVideo.onloadedmetadata = () => {
+                originalWidth = previewVideo.videoWidth;
+                originalHeight = previewVideo.videoHeight;
+                originalAspectRatio = originalWidth / originalHeight;
+                currentAspectRatio = originalAspectRatio;
+                widthInput.value = originalWidth;
+                heightInput.value = originalHeight;
+                
+                // Check for audio
+                hasAudio = previewVideo.mozHasAudio || 
+                          previewVideo.webkitAudioDecodedByteCount > 0 ||
+                          previewVideo.audioTracks && previewVideo.audioTracks.length > 0;
+                
+                audioIndicator.style.display = hasAudio ? 'inline-flex' : 'none';
+                
+                updateMediaInfo(file);
+                detectAndSetAspectRatio();
+                updatePreviewInfo();
+            };
+        }
+
+        function detectAndSetAspectRatio() {
+            const ratio = currentAspectRatio;
+            let matchedRatio = null;
+            
+            // Check common ratios
+            const commonRatios = {
+                '16:9': 16/9,
+                '4:3': 4/3,
+                '1:1': 1,
+                '9:16': 9/16,
+                '21:9': 21/9,
+                '3:2': 3/2
+            };
+            
+            for (const [name, value] of Object.entries(commonRatios)) {
+                if (Math.abs(ratio - value) < 0.05) {
+                    matchedRatio = name;
+                    break;
+                }
+            }
+            
+            if (matchedRatio) {
+                document.querySelectorAll('.ratio-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.ratio === matchedRatio);
+                });
+                const [w, h] = matchedRatio.split(':').map(Number);
+                ratioWidth.value = w;
+                ratioHeight.value = h;
+            } else {
+                document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+                // Set custom ratio
+                const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+                const divisor = gcd(Math.round(originalWidth), Math.round(originalHeight));
+                ratioWidth.value = Math.round(originalWidth / divisor);
+                ratioHeight.value = Math.round(originalHeight / divisor);
+            }
+        }
+
+        function updateAspectRatioFromInputs() {
+            const w = parseInt(widthInput.value);
+            const h = parseInt(heightInput.value);
+            if (w > 0 && h > 0) {
+                currentAspectRatio = w / h;
+            }
+        }
+
+        function applyAspectRatio() {
+            if (aspectRatioLock.checked && widthInput.value) {
+                heightInput.value = Math.round(widthInput.value / currentAspectRatio);
+            }
+            updatePreviewInfo();
+        }
+
+        function updatePreviewInfo() {
+            const currentWidth = parseInt(widthInput.value) || 0;
+            const currentHeight = parseInt(heightInput.value) || 0;
+            const currentRatio = currentWidth > 0 && currentHeight > 0 ? 
+                (currentWidth / currentHeight).toFixed(2) : '0';
+            
+            previewInfo.innerHTML = `
+                <div><strong>Output:</strong> ${currentWidth}×${currentHeight}</div>
+                <div><strong>Ratio:</strong> ${currentRatio}</div>
+                <div><strong>Mode:</strong> ${resizeMode === 'fit' ? 'Fit (Maintain Ratio)' : 'Fill (Exact Size)'}</div>
+            `;
+        }
+
+        function updateMediaInfo(file) {
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            let duration = '';
+            let audioInfo = '';
+            
+            if (currentMediaType === 'video') {
+                const video = previewVideo;
+                if (video.duration) {
+                    const minutes = Math.floor(video.duration / 60);
+                    const seconds = Math.floor(video.duration % 60);
+                    duration = `<div><strong>Duration:</strong> ${minutes}:${seconds.toString().padStart(2, '0')}</div>`;
+                }
+                if (hasAudio) {
+                    audioInfo = `<div><strong>Audio:</strong> <span style="color: var(--success);">Present</span></div>`;
+                }
+            }
+            
+            mediaInfo.innerHTML = `
+                <div><strong>Type:</strong> ${currentMediaType === 'image' ? 'Image' : 'Video'}</div>
+                <div><strong>Size:</strong> ${fileSize} MB</div>
+                <div><strong>Original:</strong> ${originalWidth}×${originalHeight}</div>
+                <div><strong>Aspect Ratio:</strong> ${calculateAspectRatio(originalWidth, originalHeight)}</div>
+                ${duration}
+                ${audioInfo}
+            `;
+        }
+
+        function calculateAspectRatio(width, height) {
+            const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+            const divisor = gcd(width, height);
+            return `${width / divisor}:${height / divisor}`;
+        }
+
+        function updateMediaTransform() {
+            const element = currentMediaType === 'image' ? previewImage : previewVideo;
+            element.style.transform = `rotate(${rotation}deg) scaleX(${flipH}) scaleY(${flipV})`;
+        }
+
+        async function applyChanges() {
+            if (!currentFile) return;
+
+            loadingOverlay.classList.add('active');
+            progressContainer.classList.add('active');
+
+            try {
+                if (currentMediaType === 'image') {
+                    await processImage();
+                } else {
+                    await processVideo();
+                }
+            } catch (error) {
+                console.error('Processing error:', error);
+                showToast('Error', 'Failed to process media', 'error');
+            } finally {
+                loadingOverlay.classList.remove('active');
+                progressContainer.classList.remove('active');
+                progressFill.style.width = '0%';
+            }
+        }
+
+        function processImage() {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                const newWidth = parseInt(widthInput.value);
+                const newHeight = parseInt(heightInput.value);
+                
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+                
+                ctx.save();
+                
+                // Apply transformations
+                ctx.translate(newWidth / 2, newHeight / 2);
+                ctx.rotate((rotation * Math.PI) / 180);
+                ctx.scale(flipH, flipV);
+                
+                ctx.drawImage(previewImage, -newWidth / 2, -newHeight / 2, newWidth, newHeight);
+                ctx.restore();
+                
+                // Determine output format
+                let format = 'image/jpeg';
+                let extension = 'jpg';
+                
+                if (outputFormat === 'png') {
+                    format = 'image/png';
+                    extension = 'png';
+                } else if (outputFormat === 'auto') {
+                    // Use original format if possible
+                    if (currentFile.type === 'image/png') {
+                        format = 'image/png';
+                        extension = 'png';
+                    }
+                }
+                
+                canvas.toBlob((blob) => {
+                    downloadFile(blob, `display_optimized_${currentFile.name.split('.')[0]}.${extension}`);
+                    showToast('Success', 'Image optimized successfully', 'success');
+                    resolve();
+                }, format, qualitySlider.value / 100);
+            });
+        }
+
+        async function processVideo() {
+            return new Promise(async (resolve) => {
+                const newWidth = parseInt(widthInput.value);
+                const newHeight = parseInt(heightInput.value);
+                const targetFrameRate = frameRate.value === 'auto' ? 30 : parseInt(frameRate.value);
+                const targetBitrate = bitrate.value === 'auto' ? 5000000 : parseInt(bitrate.value) * 1000;
+                const targetAudioBitrate = audioQuality.value === 'auto' ? 128000 : parseInt(audioQuality.value) * 1000;
+                
+                // Create canvas for video processing
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+                
+                // Create video element for processing
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(currentFile);
+                video.muted = false;
+                
+                video.addEventListener('loadedmetadata', async () => {
+                    const duration = video.duration;
+                    const originalFrameRate = 30; // Estimate
+                    const totalFrames = Math.floor(duration * targetFrameRate);
+                    const frameInterval = 1000 / targetFrameRate;
+                    
+                    // Create audio context and capture audio if present
+                    let audioStream = null;
+                    if (hasAudio) {
+                        try {
+                            audioStream = await captureAudioStream(video);
+                        } catch (error) {
+                            console.log('Audio capture failed, continuing with video only');
+                        }
+                    }
+                    
+                    // Create MediaRecorder for output
+                    const outputStream = canvas.captureStream(targetFrameRate);
+                    
+                    // Add audio track if available
+                    if (audioStream) {
+                        const audioTracks = audioStream.getAudioTracks();
+                        if (audioTracks.length > 0) {
+                            outputStream.addTrack(audioTracks[0]);
+                        }
+                    }
+                    
+                    const mimeType = outputFormat === 'mp4' ? 'video/webm;codecs=vp9,opus' : 'video/webm;codecs=vp9,opus';
+                    const mediaRecorder = new MediaRecorder(outputStream, {
+                        mimeType: mimeType,
+                        videoBitsPerSecond: targetBitrate,
+                        audioBitsPerSecond: targetAudioBitrate
+                    });
+                    
+                    const chunks = [];
+                    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'video/webm' });
+                        const extension = outputFormat === 'mp4' ? 'mp4' : 'webm';
+                        downloadFile(blob, `display_optimized_${currentFile.name.split('.')[0]}.${extension}`);
+                        showToast('Success', `Video processed successfully${hasAudio ? ' with audio' : ''}`, 'success');
+                        URL.revokeObjectURL(video.src);
+                        resolve();
+                    };
+                    
+                    mediaRecorder.start();
+                    
+                    // Process each frame
+                    let currentTime = 0;
+                    const processFrame = async () => {
+                        if (currentTime >= duration) {
+                            mediaRecorder.stop();
+                            return;
+                        }
+                        
+                        video.currentTime = currentTime;
+                        await new Promise(r => video.onseeked = r);
+                        
+                        // Clear canvas and apply transformations
+                        ctx.save();
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.translate(canvas.width / 2, canvas.height / 2);
+                        ctx.rotate((rotation * Math.PI) / 180);
+                        ctx.scale(flipH, flipV);
+                        
+                        // Draw video frame
+                        ctx.drawImage(video, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+                        ctx.restore();
+                        
+                        // Update progress
+                        const progress = (currentTime / duration) * 100;
+                        progressFill.style.width = progress + '%';
+                        progressText.textContent = `Processing: ${Math.round(progress)}%${hasAudio ? ' (with audio)' : ''}`;
+                        
+                        currentTime += 1 / targetFrameRate;
+                        setTimeout(processFrame, 10);
+                    };
+                    
+                    processFrame();
+                });
+                
+                video.load();
+            });
+        }
+
+        async function captureAudioStream(video) {
+            return new Promise((resolve, reject) => {
+                try {
+                    // Create audio context
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create source from video element
+                    const source = audioContext.createMediaElementSource(video);
+                    
+                    // Create destination for recording
+                    const destination = audioContext.createMediaStreamDestination();
+                    
+                    // Connect source to destination
+                    source.connect(destination);
+                    source.connect(audioContext.destination);
+                    
+                    // Get the stream
+                    const stream = destination.stream;
+                    resolve(stream);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        }
+
+        function downloadFile(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function resetAll() {
+            currentFile = null;
+            currentMediaType = null;
+            rotation = 0;
+            flipH = 1;
+            flipV = 1;
+            outputFormat = 'auto';
+            currentAspectRatio = 16/9;
+            resizeMode = 'fit';
+            hasAudio = false;
+            
+            uploadArea.style.display = 'block';
+            mediaPreview.classList.remove('active');
+            applyBtn.disabled = true;
+            videoSettingsGroup.style.display = 'none';
+            audioIndicator.style.display = 'none';
+            
+            previewImage.style.transform = '';
+            previewVideo.style.transform = '';
+            
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.resize-mode-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.format-btn[data-format="auto"]').classList.add('active');
+            document.querySelector('.resize-mode-btn[data-mode="fit"]').classList.add('active');
+            
+            widthInput.value = '';
+            heightInput.value = '';
+            ratioWidth.value = 16;
+            ratioHeight.value = 9;
+            qualitySlider.value = 90;
+            qualityValue.textContent = '90%';
+            aspectRatioLock.checked = true;
+            frameRate.value = 'auto';
+            bitrate.value = 'auto';
+            audioQuality.value = 'auto';
+            
+            fileInput.value = '';
+        }
+
+        function showToast(title, message, type = 'success') {
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            toast.className = `toast ${type}`;
+            
+            const icon = toast.querySelector('i');
+            icon.className = type === 'success' ? 'fas fa-check-circle' : 
+                           type === 'error' ? 'fas fa-exclamation-circle' : 
+                           'fas fa-exclamation-triangle';
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
