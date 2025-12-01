@@ -1342,59 +1342,45 @@
             };
             reader.readAsDataURL(file);
         }
+async function extractAudio(inputFile) {
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({ log: false });
 
-        async function loadVideo(file) {
-            // Clear any existing timeout
-            if (videoLoadTimeout) {
-                clearTimeout(videoLoadTimeout);
-            }
+    await ffmpeg.load();
 
-            // Reset video element
-            previewVideo.src = '';
-            previewVideo.load();
-            
-            // Create object URL
-            const url = URL.createObjectURL(file);
-            
-            // Set up video element
-            previewVideo.src = url;
-            previewVideo.style.display = 'block';
-            previewImage.style.display = 'none';
-            previewVideo.muted = true;
-            previewVideo.playsInline = true;
-            previewVideo.crossOrigin = 'anonymous';
-            
-            // Set up timeout for video loading
-            videoLoadTimeout = setTimeout(() => {
-                showVideoError('Video loading timeout. The file might be too large or in an unsupported format.');
-                cleanupVideoResources(url);
-            }, 15000); // 15 seconds timeout
-            
-            // Set up event listeners
-            const handleVideoLoaded = () => {
-                clearTimeout(videoLoadTimeout);
-                
-                try {
-                    if (previewVideo.videoWidth && previewVideo.videoHeight) {
-                        originalWidth = previewVideo.videoWidth;
-                        originalHeight = previewVideo.videoHeight;
-                        originalAspectRatio = originalWidth / originalHeight;
-                        currentAspectRatio = originalAspectRatio;
-                        
-                        // Detect real FPS from video
-                        detectRealFrameRate(previewVideo).then(fps => {
-                            originalFrameRate = fps;
-                            
-                            widthInput.value = 3840;
-                            heightInput.value = 2160;
-                            frameRate.value = 'original';
-                            
-                            updateMediaInfo(file);
-                            detectAndSetAspectRatio();
-                            updatePreviewInfo();
-                            
-                            showToast('Success', `Video loaded successfully (${originalFrameRate} FPS detected)`, 'success');
-                        }).catch(error => {
+    ffmpeg.FS("writeFile", "input.mp4", await fetchFile(inputFile));
+    await ffmpeg.run(
+        "-i", "input.mp4",
+        "-vn", // no video
+        "-acodec", "copy",
+        "audio.aac"
+    );
+
+    let data = ffmpeg.FS("readFile", "audio.aac");
+    return new Blob([data.buffer], { type: "audio/aac" });
+}
+async function muxVideoAndAudio(videoBlob, audioBlob) {
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({ log: false });
+
+    await ffmpeg.load();
+
+    ffmpeg.FS("writeFile", "video.webm", await fetchFile(videoBlob));
+    ffmpeg.FS("writeFile", "audio.aac", await fetchFile(audioBlob));
+
+    await ffmpeg.run(
+        "-i", "video.webm",
+        "-i", "audio.aac",
+        "-c:v", "copy",
+        "-c:a", "aac",
+        "-shortest",
+        "final.mp4"
+    );
+
+    let data = ffmpeg.FS("readFile", "final.mp4");
+    return new Blob([data.buffer], { type: "video/mp4" });
+}
+.catch(error => {
                             console.error('Error detecting frame rate:', error);
                             // Continue with default frame rate
                             originalFrameRate = 30;
@@ -1989,3 +1975,4 @@
     </script>
 </body>
 </html>
+
